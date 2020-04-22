@@ -1,585 +1,440 @@
-//Header.h Code:
+//Sort.h
+//Header file
 #pragma once
-#define BUTTON_ID      1001
-#define BUTTON_ID1      1002
-#define BUTTON_ID2      1003
-#define BUTTON_ID3      1004
-#define BUTTON_ID4      1005
-#define BUTTON_ID5      1006
-#define BUTTON_ID6      1007
-#define BUTTON_ID7      1008
-#define BUTTON_ID8      1009
-#define BUTTON_ID9      1010
-#define BUTTON_ID10      1011
-#define BUTTON_ID11      1012
-#define BUTTON_ID12      1013
-#define BUTTON_ID13      1014
-#define BUTTON_ID14      1015
-#define BUTTON_ID15      1016
-
-struct C_l {
-	char * tum_znak;
-	int * cufru;
-
+#include <stdlib.h>
+#include <string.h>
+#include <tchar.h>
+struct Member
+{
+	char symb;
+	int nuber;
+	bool triger;
 };
-
-class Elem {
-	C_l st;
-	Elem * next;
-public:
-	Elem() :next(0) { st.tum_znak = new char[100]; st.cufru = new int[100]; }
-	friend class Rozrah;
+struct Ret {
+	Member mainCont[50];
+	int countelem;
+	bool error;
 };
-
-class Rozrah {
-	Elem * Tail, *Head;
-public:
-	Rozrah() :Tail(NULL), Head(NULL) {}
-	int	push(char*zna, int*cuf, int te) {
-		Elem * buf = new Elem;
-		//fflush(stdin);
-		for (int i = 0; i<te + 1; i++)
-		{
-			buf->st.tum_znak[i] = zna[i];
-			buf->st.cufru[i] = cuf[i];
-			if (Head == 0)
-			{
-				Head = Tail = buf;
-			}
-			Tail->next = buf;
-			Tail = buf;
-		}
-		int result;
-		int vol = 0;
-		int col = 0;
-		for (int i = 0; i<te; i++, col++)
-		{
-			if ((buf->st.tum_znak[col] == '+' || buf->st.tum_znak[col] == '-'))
-			{
-				if (vol == 0) {
-					switch (buf->st.tum_znak[col])
-					{
-					case'+':
-						result = buf->st.cufru[i] + buf->st.cufru[i + 1];
-						break;
-					case'-':
-						result = buf->st.cufru[i] - buf->st.cufru[i + 1];
-						break;
-					}
-				}
-				if (vol>0 && i<te) {
-					switch (buf->st.tum_znak[col])
-					{
-					case'+':
-						result = result + buf->st.cufru[i + 1];
-						break;
-					case'-':
-						result = result - buf->st.cufru[i + 1];
-						break;
-					}
-				}
-				vol++;
-			}
-		}
-		return result;
+struct Retrozrah
+{
+	int znach;
+	bool error = false;
+};
+Ret Sortcalc(char*str);
+Retrozrah Rozcala(Ret chang);
+_____________________________________________________________________________________________
+//Sort.cpp
+//Cpp file
+#include"Sort.h"
+Ret Sortcalc(char*str)
+{
+	Ret mainRet;
+	//тригер для цифр і символів + -
+	if ((str[0] < 48 || str[0] > 57) && (str[0] != 43) && (str[0] != 45)) {
+		mainRet.error = true;
+		return mainRet;
 	}
-};
-
-Source.cpp Code :
-#include <windows.h>  
-#include <stdlib.h>  
-#include <string.h>  
-#include <tchar.h>  
-#include <CommCtrl.h>
-#include "Header.h"
-using namespace std;
-
-
-
-// Global variables  
-// The main window class name.  
-static TCHAR szWindowClass[] = _T("win32app");
-
-// The string that appears in the application's title bar.  
+	//логіка сортування
+	char conteinerchar[10];
+	Member mainConteiner[50];
+	int coutmainCont = 0;
+	for (int i = 0, a = 0; i < strlen(str) + 1; i++)
+	{
+		if (str[i] >= 48 && str[i] <= 57)
+		{
+			for (int g = 0, j = i; j < strlen(str) + 1; j++, g++, i++) {
+				if (str[j] >= 48 && str[j] <= 57)
+					conteinerchar[g] = str[i];
+				else
+					break;
+			}
+			mainConteiner[a].nuber = atoi(conteinerchar);
+			memset(conteinerchar, '\0', 10);
+			mainConteiner[a].triger = true;
+			a++;
+			coutmainCont++;
+			i--;
+		}
+		else
+		{
+			mainConteiner[a].symb = str[i];
+			mainConteiner[a].triger = false;
+			a++;
+			coutmainCont++;
+		}
+	}
+	//тригер на символи підряд
+	for (int i = 0; i < coutmainCont; i++) {
+		if ((mainConteiner[i].triger == false) && (mainConteiner[i + 1].triger == false)) {
+			mainRet.error = true;
+			return mainRet;
+		}
+	}
+	mainRet.error = false;
+	for (int i = 0; i < coutmainCont; i++)
+		mainRet.mainCont[i] = mainConteiner[i];
+	mainRet.countelem = coutmainCont;
+	return mainRet;
+}
+Retrozrah Rozcala(Ret chang) {
+	//обрахунок
+	Member mainConteiner[50];
+	int coutmainCont = chang.countelem;
+	Retrozrah znach;
+	for (int i = 0; i < coutmainCont; i++)
+		mainConteiner[i] = chang.mainCont[i];
+	int tr = 0;
+	int rozrah;
+	int tymzmin;
+	if (coutmainCont == 2)
+		rozrah = mainConteiner[0].nuber;
+	for (int i = 0; i < coutmainCont - 2; ) {
+		if ((mainConteiner[0].triger == false) && (mainConteiner[0].symb == '-') && (tr == 0)) {
+			rozrah = mainConteiner[1].nuber *(-1);
+			tr++;
+			i++;
+			continue;
+		}
+		if ((mainConteiner[0].triger == false) && (mainConteiner[0].symb == '+') && (tr == 0)) {
+			rozrah = mainConteiner[1].nuber;
+			tr++;
+			i++;
+			continue;
+		}
+		if (tr == 0) {
+			rozrah = mainConteiner[0].nuber;
+			tr++;
+		}
+		if ((mainConteiner[i].triger == true) && (mainConteiner[i + 1].triger == false)) {
+			switch (mainConteiner[i + 1].symb)
+			{
+			case '*':
+				rozrah = rozrah*mainConteiner[i + 2].nuber;
+				i = i + 2;
+				break;
+			case '/':
+				if (mainConteiner[i + 2].nuber != 0) {
+					rozrah = rozrah / mainConteiner[i + 2].nuber;
+					i = i + 2;
+				}
+				else {
+					znach.error = true;
+					return znach;
+				}
+				break;
+			case '+':
+				tymzmin = 0;
+				if ((mainConteiner[i + 3].symb == '+') && (mainConteiner[i + 3].symb == '-')) {
+					rozrah = rozrah + mainConteiner[i + 2].nuber;
+					i = i + 2;
+				}
+				else {
+					int j;
+					tymzmin = mainConteiner[i + 2].nuber;
+					for (j = i + 2; j < coutmainCont - 2;) {
+						if (mainConteiner[j + 1].symb == '*')
+						{
+							tymzmin = tymzmin*mainConteiner[j + 2].nuber;
+							j = j + 2;
+						}
+						if (mainConteiner[j + 1].symb == '/')
+						{
+							if (mainConteiner[j + 2].nuber != 0) {
+								tymzmin = tymzmin / mainConteiner[j + 2].nuber;
+								j = j + 2;
+							}
+							else {
+								znach.error = true;
+								return znach;
+							}
+						}
+						if ((mainConteiner[j + 1].symb == '+') || (mainConteiner[j + 1].symb == '-'))
+							break;
+					}
+					rozrah = rozrah + tymzmin;
+					i = j;
+				}
+				break;
+			case '-':
+				tymzmin = 0;
+				if ((mainConteiner[i + 3].symb == '+') && (mainConteiner[i + 3].symb == '-')) {
+					rozrah = rozrah + mainConteiner[i + 2].nuber;
+					i = i + 2;
+				}
+				else {
+					int j;
+					tymzmin = mainConteiner[i + 2].nuber;
+					for (j = i + 2; j < coutmainCont - 2;) {
+						if (mainConteiner[j + 1].symb == '*')
+						{
+							tymzmin = tymzmin*mainConteiner[j + 2].nuber;
+							j = j + 2;
+						}
+						if (mainConteiner[j + 1].symb == '/')
+						{
+							if (mainConteiner[j + 2].nuber != 0) {
+								tymzmin = tymzmin / mainConteiner[j + 2].nuber;
+								j = j + 2;
+							}
+							else {
+								znach.error = true;
+								return znach;
+							}
+						}
+						if ((mainConteiner[j + 1].symb == '+') || (mainConteiner[j + 1].symb == '-'))
+							break;
+					}
+					rozrah = rozrah - tymzmin;
+					i = j;
+				}
+				break;
+			}
+		}
+	}
+	znach.znach = rozrah;
+	return znach;
+}
+____________________________________________________________________________________________________________________________
+//main.cpp
+//Cpp file
+#include <windows.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tchar.h>
+#include "Sort.h"
+// Global variables
+// The main window class name.
+static TCHAR szWindowClass[] = _T("CalculatorDesk");
+// The string that appears in the application's title bar.
 static TCHAR szTitle[] = _T("Calculator");
-
 HINSTANCE hInst;
-
-// Forward declarations of functions included in this code module:  
+// Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
+//fnc winMain
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance,
-	_In_ HINSTANCE hPrevInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPSTR     lpCmdLine,
 	_In_ int       nCmdShow
 )
 {
 	WNDCLASSEX wcex;
-
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+	wcex.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 3);
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = szWindowClass;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-
+	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
 			_T("Call to RegisterClassEx failed!"),
-			_T("Win32 Guided Tour"),
+			_T("Windows Desktop Guided Tour"),
 			NULL);
-
 		return 1;
 	}
-
-	hInst = hInstance; // Store instance handle in our global variable  
-
-					   // The parameters to CreateWindow explained:  
-					   // szWindowClass: the name of the application  
-					   // szTitle: the text that appears in the title bar  
-					   // WS_OVERLAPPEDWINDOW: the type of window to create  
-					   // CW_USEDEFAULT, CW_USEDEFAULT: initial position (x, y)  
-					   // 500, 100: initial size (width, length)  
-					   // NULL: the parent of this window  
-					   // NULL: this application does not have a menu bar  
-					   // hInstance: the first parameter from WinMain  
-					   // NULL: not used in this application  
+	// Store instance handle in our global variable
+	hInst = hInstance;
+	// The parameters to CreateWindow explained:
+	// szWindowClass: the name of the application
+	// szTitle: the text that appears in the title bar
+	// WS_OVERLAPPEDWINDOW: the type of window to create
+	// CW_USEDEFAULT, CW_USEDEFAULT: initial position (x, y)
+	// 500, 100: initial size (width, length)
+	// NULL: the parent of this window
+	// NULL: this application does not have a menu bar
+	// hInstance: the first parameter from WinMain
+	// NULL: not used in this application
 	HWND hWnd = CreateWindow(
 		szWindowClass,
 		szTitle,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		215, 200,
+		200, 200,
 		NULL,
 		NULL,
 		hInstance,
 		NULL
 	);
-
 	if (!hWnd)
 	{
 		MessageBox(NULL,
 			_T("Call to CreateWindow failed!"),
-			_T("Win32 Guided Tour"),
+			_T("Windows Desktop Guided Tour"),
 			NULL);
-
 		return 1;
 	}
-
-	// The parameters to ShowWindow explained:  
-	// hWnd: the value returned from CreateWindow  
-	// nCmdShow: the fourth parameter from WinMain  
+	// The parameters to ShowWindow explained:
+	// hWnd: the value returned from CreateWindow
+	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd,
 		nCmdShow);
 	UpdateWindow(hWnd);
 
-	// Main message loop:  
+	// Main message loop:
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
 	return (int)msg.wParam;
 }
-
-//  
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)  
-//  
-//  PURPOSE:  Processes messages for the main window.  
-//  
-//  WM_PAINT    - Paint the main window  
-//  WM_DESTROY  - post a quit message and return  
-//  
-//  
-
-
+//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE:  Processes messages for the main window.
+//
+//  WM_PAINT    - Paint the main window
+//  WM_DESTROY  - post a quit message and return
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hButton[17];
+	static HWND hButton[3][6];
 	static wchar_t st1[100];
-
+	wchar_t id[20] = { L"BUTTON_ID" };
+	wchar_t s[10];
+	wchar_t sym[6] = { '+','-','*','/','C','=' };
+	int countcuv = 1;
+	int countchar = 0;
+	int countchar1 = 10;
 	switch (message)
 	{
-
 	case WM_CREATE:
-
-		hButton[0] = CreateWindow(L"button", L"1",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			5, 60,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID,
-			hInst, NULL);
-		hButton[1] = CreateWindow(L"button", L"2",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			40, 60,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID1,
-			hInst, NULL);
-		hButton[2] = CreateWindow(L"button", L"3",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			75, 60,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID2,
-			hInst, NULL);
-		hButton[3] = CreateWindow(L"button", L"4",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			5, 95,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID3,
-			hInst, NULL);
-		hButton[4] = CreateWindow(L"button", L"5",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			40, 95,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID4,
-			hInst, NULL);
-		hButton[5] = CreateWindow(L"button", L"6",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			75, 95,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID5,
-			hInst, NULL);
-		hButton[6] = CreateWindow(L"button", L"7",
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 5; j++)
+			{
+				if (j < 3)
+				{
+					wsprintf(s, L"%d", countcuv);
+					hButton[i][j] = CreateWindow(L"button", s,
+						WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
+						5 + j * 35, 25 + i * 35,
+						35, 35,
+						hWnd, (HMENU)(1000 + countcuv),
+						hInst, NULL);
+					countcuv++;
+				}
+				else {			
+					s[0] = sym[countchar];
+					hButton[i][j] = CreateWindow(L"button", s,
+						WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
+						5 + j * 35, 25 + i * 35,
+						35, 35,
+						hWnd, (HMENU)(1000 + countchar1),
+						hInst, NULL);
+					countchar1++;
+					countchar++;
+				  }
+				}
+		}
+		hButton[3][16] = CreateWindow(L"button", L"0",
 			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
 			5, 130,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID6,
+			175, 35,
+			hWnd, (HMENU)1016,
 			hInst, NULL);
-		hButton[7] = CreateWindow(L"button", L"8",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			40, 130,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID7,
-			hInst, NULL);
-		hButton[8] = CreateWindow(L"button", L"9",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			75, 130,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID8,
-			hInst, NULL);
-		hButton[9] = CreateWindow(L"button", L"+",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			110, 60,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID9,
-			hInst, NULL);
-		hButton[10] = CreateWindow(L"button", L"-",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			145, 60,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID10,
-			hInst, NULL);
-		hButton[11] = CreateWindow(L"button", L"*",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			110, 95,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID11,
-			hInst, NULL);
-		hButton[12] = CreateWindow(L"button", L"/",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			145, 95,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID12,
-			hInst, NULL);
-		hButton[13] = CreateWindow(L"button", L"C",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			110, 130,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID13,
-			hInst, NULL);
-		hButton[14] = CreateWindow(L"button", L"=",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			145, 130,
-			35, 35,
-			hWnd, (HMENU)BUTTON_ID14,
-			hInst, NULL);
-		hButton[15] = CreateWindow(L"button", L"0",
-			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			5, 25,
-			70, 35,
-			hWnd, (HMENU)BUTTON_ID15,
-			hInst, NULL);
-
-		CreateWindowEx(NULL, L"Edit", L"GOOD", WS_VISIBLE | WS_CHILD, 5, 5, 180, 20, hWnd, NULL, hInst, NULL);
-
+		CreateWindowEx(NULL, L"Edit", L"0", WS_VISIBLE | WS_CHILD, 5, 5, 175, 20, hWnd, NULL, hInst, NULL);
 		break;
 
 	case WM_COMMAND:
-
-		if (LOWORD(wParam) == BUTTON_ID) {
-			lstrcatW(st1, L"1");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID1) {
-			lstrcatW(st1, L"2");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID2) {
-			lstrcatW(st1, L"3");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID3) {
-			lstrcatW(st1, L"4");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID4) {
-			lstrcatW(st1, L"5");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID5) {
-			lstrcatW(st1, L"6");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID6) {
-			lstrcatW(st1, L"7");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID7) {
-			lstrcatW(st1, L"8");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID8) {
-			lstrcatW(st1, L"9");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID9) {
-			lstrcatW(st1, L"+");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID10) {
-			lstrcatW(st1, L"-");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID11) {
-			lstrcatW(st1, L"*");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID12) {
-			lstrcatW(st1, L"/");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID13) {
-			int g = 0;
-			wsprintf(st1, L"%d", g);
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID15) {
-			lstrcatW(st1, L"0");
-			SetDlgItemText(hWnd, 0, st1);
-		}
-
-		if (LOWORD(wParam) == BUTTON_ID14) {
-			char *str = new char[100];
-			char go[100];
-			int n = 1;
-			int ia;
-			int io = 0;
-			int kp;
-			int pol[100];
-			int to = 0;
-			char znak[100];
-			int jk = 0;
-			for (int i = 0; i < 100; i++)
-			{
-				str[i] = (char)st1[i];
-			}
-			int lk = 0;
-			int hp = 0;
-			for (int i = 0; i<strlen(str) + 1; i++)
-			{
-				if ((str[i] >= 48 && str[i] <= 57) || str[i] == 42 || str[i] == 43 || str[i] == 45 || str[i] == 47)
-				{
-					lk++;
-				}
-				if ((str[i] == 42 && str[i + 1] == 42) || (str[i] == 42 && str[i + 1] == 43) || (str[i] == 42 && str[i + 1] == 45) || (str[i] == 42 && str[i + 1] == 47))
-				{
-					hp++;
-				}
-				if ((str[i] == 43 && str[i + 1] == 43) || (str[i] == 43 && str[i + 1] == 45) || (str[i] == 43 && str[i + 1] == 47) || (str[i] == 43 && str[i + 1] == 42))
-				{
-					hp++;
-				}
-				if ((str[i] == 45 && str[i + 1] == 45) || (str[i] == 45 && str[i + 1] == 47) || (str[i] == 45 && str[i + 1] == 42) || (str[i] == 45 && str[i + 1] == 43))
-				{
-					hp++;
-				}
-				if ((str[i] == 47 && str[i + 1] == 47) || (str[i] == 47 && str[i + 1] == 45) || (str[i] == 47 && str[i + 1] == 43) || (str[i] == 47 && str[i + 1] == 42))
-				{
-					hp++;
-				}
-				if (str[0] == 42 || str[0] == 43 || str[0] == 45 || str[0] == 47)
-					hp++;
-			}
-
-			if ((lk == strlen(str)) && hp == 0)
-			{
-				for (int i = 0; i<strlen(str) + 1; i++)
-				{
-					if (str[i] >= 48 && str[i] <= 57)
-					{
-						if (io == 0)
-						{
-							memset(go, '\0', 100);
-							go[io] = str[i];
-							kp = i;
-						}
-						if (io>0 && i == kp + io)
-						{
-							go[io] = str[i];
-						}
-						if (i != kp + io)
-						{
-							ia = atoi(go);
-							io = 0;
-							i = i - 1;
-							pol[to] = ia;
-							to++;
-						}
-						if (i == kp + io)
-							io++;
-					}
-				}
-				ia = atoi(go);
-				pol[to] = ia;
-				for (int i = 0; i<strlen(str) + 1; i++)
-				{
-					if (str[i] >= 42 && str[i] <= 47)
-					{
-						znak[jk] = str[i];
-						jk++;
-					}
-				}
-				int volu = 0;
-				int torp;
-				int ozop = 0;
-				char tum_znak[100];
-				int tum_zmin[100];
-				int ka = 0;
-				int job = 0;
-				for (int i = 0; i<to + 2; i++)
-				{
-					if (znak[i] == '+' || znak[i] == '-')
-					{
-						tum_znak[ozop] = znak[i];
-						tum_zmin[ozop] = pol[i];
-						ozop++;
-					}
-					if (znak[i] == '*' || znak[i] == '/')
-					{
-						volu = 0;
-						for (int z = i; z<to + 2; z++)
-						{
-							if ((znak[z] == '*' || znak[z] == '/') && volu == 0)
-							{
-								switch (znak[z])
-								{
-								case'*':
-									torp = pol[z] * pol[z + 1];
-									break;
-								case'/':
-									torp = pol[z] / pol[z + 1];
-									break;
-								}
-							}
-							if ((znak[z] == '*' || znak[z] == '/') && volu>0)
-							{
-								switch (znak[z])
-								{
-								case'*':
-									torp = torp*pol[z + 1];
-									break;
-								case'/':
-									torp = torp / pol[z + 1];
-									break;
-								}
-							}
-							volu++;
-							if (znak[z + 1] == '+' || znak[z + 1] == '-')
-							{
-								tum_znak[ozop] = znak[z + 1];
-								tum_zmin[ozop] = torp;
-								ozop++;
-								i = z + 1;
+			if ((LOWORD(wParam) >=1000)&&(LOWORD(wParam)<1010)) {
+				for (int i = 0; i < 16; i++){
+						if (LOWORD(wParam) == (1000 + i)){
+								wsprintf(s, L"%d", i);
+								lstrcatW(st1, s);
+								SetDlgItemText(hWnd, 0, st1);
 								break;
-							}
-							if (znak[z + 1]<42 || znak[z + 1]>47)
-							{
-								tum_zmin[ozop] = torp;
-								ozop++;
-								i = z + 1;
-								ka++;
-								break;
-							}
 						}
-					}
-				}
-				if (ka == 0)
-					tum_zmin[ozop] = pol[to];
-				int oo;
-				if (ka == 0)
-				{
-					oo = ozop + 1;
-				}
-				else
-				{
-					oo = ozop;
-				}
-				int rate = 0;
-				for (int i = 0; i<oo; i++)
-				{
-					tum_zmin[i];
-					rate++;
-				}
-				if (rate == 1)
-				{
-					wsprintf(st1, L"%d", tum_zmin[0]);
-					SetDlgItemText(hWnd, 0, st1);
-				}
-				else
-				{
-					Rozrah g1;
-					int yu = g1.push(tum_znak, tum_zmin, oo);
-					wsprintf(st1, L"%d", yu);
-					SetDlgItemText(hWnd, 0, st1);
-				}
-			}
-			else
-			{
+			    }
+		    }
+			if ((LOWORD(wParam) >= 1010) && (LOWORD(wParam)<1017)) {
 				int g = 0;
-				wsprintf(st1, L"%d", g);
-				SetDlgItemText(hWnd, 0, st1);
-				MessageBox(NULL,
-					_T("Please try again"),
-					_T("Error"),
-					NULL);
-			}
-		}
+				size_t charsConverted = 0;
+				char str21[100];
+				Retrozrah fina;
+				Ret change;
+				wchar_t onlyzer[50] = { L"0" };
+				bool triger = false;
+				switch (LOWORD(wParam))
+				{
+				case 1010: 
+					lstrcatW(st1, L"+");
+					break;
+				case 1011:
+					lstrcatW(st1, L"-");
+					break;
+				case 1012:
+					lstrcatW(st1, L"*");
+					break;
+				case 1013:
+					lstrcatW(st1, L"/");
+					break;
+				case 1014:
+					triger = true;
+					lstrcpyW(onlyzer, L"0");
+					break;
+				case 1015:
+					if (lstrlenW(st1) == 0)
+					{
+					}
+					else{
+						for (int i = 0; i < 100; i++)
+							str21[i] = (char)st1[i];
+						change = Sortcalc(str21);
+						if (change.error == false)
+						{
+							fina = Rozcala(change);
+							if (fina.error == false) {
+								triger = true;
+								wsprintf(onlyzer, L"%d", fina.znach);
+							}
+							else {
+								triger = true;
+								MessageBox(NULL,
+									_T("Please try again"),
+									_T("Error"),
+									NULL);
+							}
+						}
+						else
+						{
+							triger = true;
+							MessageBox(NULL,
+								_T("Please try again"),
+								_T("Error"),
+								NULL);
+						}
+					}
+					break;
+				case 1016:
+					lstrcatW(st1, L"0");
+					break;
+				default:
+					break;
+				}
+				if (lstrlenW(st1) == 0&&triger==false)
+				{
+				}
+				else {
 
-		return TRUE;
+					if (triger == true) {
+						SetDlgItemText(hWnd, 0, onlyzer);
+						triger = false;
+						lstrcpyW(st1, L"");
+						lstrcpyW(onlyzer, L"0");
+					}
+					else
+						SetDlgItemText(hWnd, 0, st1);
+				}
+			}
+
+	return 0;
 
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -588,8 +443,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 		break;
 	}
-
-	return 0;
 }
 
 
